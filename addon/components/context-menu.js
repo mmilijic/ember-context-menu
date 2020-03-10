@@ -3,8 +3,7 @@ import invokeAction from 'ember-invoke-action';
 import Component from '@ember/component';
 import { inject as service } from '@ember/service';
 import { htmlSafe } from '@ember/string';
-import { reads } from '@ember/object/computed';
-import { computed, get } from '@ember/object';
+import { computed } from '@ember/object';
 
 export default class EmberContextMenu extends Component.extend(layout) {
 
@@ -30,11 +29,13 @@ export default class EmberContextMenu extends Component.extend(layout) {
     return this.contextMenu.details;
   }
 
-  @reads('contextMenu.event') clickEvent;
+  @computed('contextMenu.event') get clickEvent() {
+    return this.contextMenu.event;
+  }
 
   @computed('_selection.[]')
   get selection() {
-    return [].concat(get(this, '_selection'));
+    return [].concat(this._selection);
   }
 
   @computed('contextMenu')
@@ -57,19 +58,19 @@ export default class EmberContextMenu extends Component.extend(layout) {
 
   @computed('contextMenu.position.{left,top}')
   get position() {
-    let { left, top } = get(this, 'contextMenu.position') || {};
+    let { left, top } = this.contextMenu.position || {};
     return htmlSafe(`left: ${ left }px; top: ${ top }px;`);
   }
 
   @computed('selection.[]', 'details')
   get itemIsDisabled() {
-    let selection = get(this, 'selection') || [];
-    let details = get(this, 'details');
+    let selection = this.selection || [];
+    let details = this.details;
 
     return function (item) {
-      let disabled = get(item, 'disabled');
+      let disabled = this.item.disabled;
 
-      if (!get(item, 'action') && !get(item, 'subActions')) {
+      if (!this.item.action && !this.item.subActions) {
         return true;
       }
 
@@ -83,9 +84,9 @@ export default class EmberContextMenu extends Component.extend(layout) {
 
   @computed('selection.[]', 'details')
   get clickAction() {
-    let selection = get(this, 'selection');
-    let details = get(this, 'details');
-    let event = get(this, 'clickEvent');
+    let selection = this.selection;
+    let details = this.details;
+    let event = this.clickEvent;
 
     return function (item) {
       invokeAction(item, 'action', selection, details, event);
