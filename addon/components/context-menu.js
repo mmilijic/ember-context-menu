@@ -1,52 +1,71 @@
-import layout from '../templates/components/context-menu-item';
-
-import Component from '@ember/component';
-import { computed, get } from '@ember/object';
-import { tagName, classNames, className } from '@ember-decorators/component';
+import layout from '../templates/components/context-menu';
 import invokeAction from 'ember-invoke-action';
+import Component from '@ember/component';
+import { inject as service } from '@ember/service';
+import { htmlSafe } from '@ember/string';
+import { reads } from '@ember/object/computed';
+import { computed, get } from '@ember/object';
 
-@tagName('li')
-@classNames('context-menu__item')
-export default class ContextMenuItem extends Component.extend(layout) {
+export default Component.extend({
+  layout,
 
-  @computed('isDisabled')
-  @className
-  get itemDisabled() {
-    return this.isDisabled ? 'context-menu__item--disabled' : '';
-  }
+  contextMenu: service('context-menu'),
 
-  @computed('_isParent')
-  @className
-  get itemParent() {
-    return this._isParent ? 'context-menu__item--parent' : '';
-  }
+  isActive:   reads('contextMenu.isActive'),
+  renderLeft: reads('contextMenu.renderLeft'),
+  items:      reads('contextMenu.items'),
+  _selection: reads('contextMenu.selection'),
+  details:    reads('contextMenu.details'),
+  clickEvent: reads('contextMenu.event'),
 
-  @computed('_isParent', 'amount')
-  get _amount() {
-    let amount = get(this, 'amount');
+  selection: computed('_selection.[]', function() {
+    return [].concat(get(this, '_selection'));
+  }),
 
-    return !get(this, '_isParent') && amount > 1 && amount;
-  }
+  didInsertElement() {
+    this._super(...arguments);
+    this.setWormholeTarget();
+  },
 
-  @computed('item')
-  get _isParent() {
-    return this.item.subActions && this.item.subActions.length > 0;
-  }
-
-  @computed('item.class')
-  @className
-  get userClassNames() {
-    return this.item.class;
-  }
-
-  @computed('item.{disabled,action}', 'itemIsDisabled')
-  get isDisabled() {
-    return invokeAction(this, 'itemIsDisabled', this.item);
-  }
-
-  click() {
-    if (!this.isDisabled && !this._isParent) {
-      invokeAction(this, 'clickAction', this.item);
+  setWormholeTarget() {
+    let id = 'wormhole-context-menu';
+    let target = document.querySelectorAll(`#${id}`);
+    if (target.length === 0) {
+      document.body.insertAdjacentHTML('beforeend', `<div id="${id}"></div>`);
     }
-  }
-}
+  },
+
+  position: computed('contextMenu.position.{left,top}', function() {
+    let { left, top } = get(this, 'contextMenu.position') || {};
+    return htmlSafe(`left: ${left}px; top: ${top}px;`);
+  }),
+
+  itemIsDisabled: computed('selection.[]', 'details', function() {
+    let selection = get(this, 'selection') || [];
+    let details   = get(this, 'details');
+
+    return function(item) {
+      let disabled  = get(item, 'disabled');
+
+      if (!get(item, 'action') && !get(item, 'subActions')) {
+        return true;
+      }
+
+      if (typeof disabled === 'function') {
+        return disabled(selection, details);
+      }
+
+      return disabled;
+    };
+  }),
+
+  clickAction: computed('selection.[]', 'details', function() {
+    let selection = get(this, 'selection');
+    let details   = get(this, 'details');
+    let event     = get(this, 'clickEvent');
+
+    return function(item) {
+      invokeAction(item, 'action', selection, details, event);
+    };
+  })
+});

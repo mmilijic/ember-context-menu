@@ -1,38 +1,52 @@
 import layout from '../templates/components/context-menu-item';
 
-import Component         from '@ember/component';
+import Component from '@ember/component';
 import { computed, get } from '@ember/object';
-import { bool }          from '@ember/object/computed';
-
+import { tagName, classNames, className } from '@ember-decorators/component';
 import invokeAction from 'ember-invoke-action';
 
-export default Component.extend({
-  layout,
+@tagName('li')
+@classNames('context-menu__item')
+export default class ContextMenuItem extends Component.extend(layout) {
 
-  tagName: 'li',
+  @computed('isDisabled')
+  @className
+  get itemDisabled() {
+    return this.isDisabled ? 'context-menu__item--disabled' : '';
+  }
 
-  classNames:        ['context-menu__item'],
-  classNameBindings: [
-    'isDisabled:context-menu__item--disabled',
-    '_isParent:context-menu__item--parent'
-  ],
+  @computed('_isParent')
+  @className
+  get itemParent() {
+    return this._isParent ? 'context-menu__item--parent' : '';
+  }
 
-  _amount: computed('_isParent', 'amount', function() {
+  @computed('_isParent', 'amount')
+  get _amount() {
     let amount = get(this, 'amount');
 
     return !get(this, '_isParent') && amount > 1 && amount;
-  }),
+  }
 
-  _isParent: bool('item.subActions.length'),
+  @computed('item')
+  get _isParent() {
+    return this.item.subActions && this.item.subActions.length > 0;
+  }
 
-  isDisabled: computed('item.{disabled,action}', 'itemIsDisabled', function() {
-    let item = get(this, 'item');
-    return invokeAction(this, 'itemIsDisabled', item);
-  }),
+  @computed('item.class')
+  @className
+  get userClassNames() {
+    return this.item.class;
+  }
+
+  @computed('item.{disabled,action}', 'itemIsDisabled')
+  get isDisabled() {
+    return invokeAction(this, 'itemIsDisabled', this.item);
+  }
 
   click() {
-    if (!get(this, 'isDisabled') && !get(this, '_isParent')) {
-      invokeAction(this, 'clickAction', get(this, 'item'));
+    if (!this.isDisabled && !this._isParent) {
+      invokeAction(this, 'clickAction', this.item);
     }
   }
-});
+}
