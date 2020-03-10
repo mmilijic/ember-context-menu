@@ -1,9 +1,9 @@
 <span class="context-menu__item__label">
   {{#if item.icon}}
-    <FaIcon @icon={{item.icon}} @class="context-menu__item__icon" @ariaHidden={{false}}/>
+    {{fa-icon item.icon class="context-menu__item__icon" ariaHidden=false}}
   {{/if}}
   {{#if item.image}}
-    <img src="{{item.image}}" class="context-menu__item__icon" alt="item icon"/>
+    <img src="{{item.image}}" class="context-menu__item__icon" alt="icon"/>
   {{/if}}
   {{item.label}} {{#if _amount}}({{_amount}}){{/if}}
 </span>
@@ -12,10 +12,10 @@
   {{#unless isDisabled}}
     <ul class="context-menu--sub">
       {{#each item.subActions as |subItem|}}
-        <ContextMenuItem @item={{subItem}}
-                         @amount={{amount}}
-                         @itemIsDisabled={{itemIsDisabled}}
-                         @clickAction={{clickAction}}/>
+        {{context-menu-item item=subItem
+                            amount=amount
+                            itemIsDisabled=itemIsDisabled
+                            clickAction=clickAction}}
       {{/each}}
     </ul>
   {{/unless}}
