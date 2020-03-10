@@ -3,7 +3,6 @@ import { moduleFor, test } from 'ember-qunit';
 let contextMenu;
 
 moduleFor('service:context-menu', 'Unit | Service | context menu', {
-  integration: true,
   beforeEach() {
     contextMenu = this.subject();
   }

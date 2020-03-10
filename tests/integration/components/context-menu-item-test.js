@@ -1,21 +1,22 @@
 import { moduleForComponent, test } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
 import $   from 'jquery';
-import { render } from '@ember/test-helpers';
 
 function hasDisabledClass($element) {
   return $element.hasClass('context-menu__item--disabled');
 }
 
 moduleForComponent('context-menu/context-menu-item',
-                   'Integration | Component | <ContextMenuItem/>',
+                   'Integration | Component | {{context-menu-item}}',
                    { integration: true });
 
 test('renders with label', function(assert) {
   this.set('item', {
     label: 'foo'
   });
-  this.render(hbs('<ContextMenuItem @item={{item}} />'));
+
+  this.render(hbs`{{context-menu-item item=item}}`);
+
   let $options = $('li.context-menu__item');
 
   assert.equal($options.length, 1, 'shows option');

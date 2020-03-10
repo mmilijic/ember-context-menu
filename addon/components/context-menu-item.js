@@ -1,52 +1,38 @@
 import layout from '../templates/components/context-menu-item';
 
-import Component from '@ember/component';
+import Component         from '@ember/component';
 import { computed, get } from '@ember/object';
-import { tagName, classNames, className } from '@ember-decorators/component';
+import { bool }          from '@ember/object/computed';
+
 import invokeAction from 'ember-invoke-action';
 
-@tagName('li')
-@classNames('context-menu__item')
-export default class ContextMenuItem extends Component.extend(layout) {
+export default Component.extend({
+  layout,
 
-  @computed('isDisabled')
-  @className
-  get itemDisabled() {
-    return this.isDisabled ? 'context-menu__item--disabled' : '';
-  }
+  tagName: 'li',
 
-  @computed('_isParent')
-  @className
-  get itemParent() {
-    return this._isParent ? 'context-menu__item--parent' : '';
-  }
+  classNames:        ['context-menu__item',],
+  classNameBindings: [
+    'isDisabled:context-menu__item--disabled',
+    '_isParent:context-menu__item--parent',
+  ],
 
-  @computed('_isParent', 'amount')
-  get _amount() {
+  _amount: computed('_isParent', 'amount', function() {
     let amount = get(this, 'amount');
 
     return !get(this, '_isParent') && amount > 1 && amount;
-  }
+  }),
 
-  @computed('item')
-  get _isParent() {
-    return this.item.subActions && this.item.subActions.length > 0;
-  }
+  _isParent: bool('item.subActions.length'),
 
-  @computed('item.class')
-  @className
-  get userClassNames() {
-    return this.item.class;
-  }
-
-  @computed('item.{disabled,action}', 'itemIsDisabled')
-  get isDisabled() {
-    return invokeAction(this, 'itemIsDisabled', this.item);
-  }
+  isDisabled: computed('item.{disabled,action}', 'itemIsDisabled', function() {
+    let item = get(this, 'item');
+    return invokeAction(this, 'itemIsDisabled', item);
+  }),
 
   click() {
-    if (!this.isDisabled && !this._isParent) {
-      invokeAction(this, 'clickAction', this.item);
+    if (!get(this, 'isDisabled') && !get(this, '_isParent')) {
+      invokeAction(this, 'clickAction', get(this, 'item'));
     }
   }
-}
+});

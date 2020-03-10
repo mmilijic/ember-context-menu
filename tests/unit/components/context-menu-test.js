@@ -3,8 +3,8 @@ import { moduleForComponent, test } from 'ember-qunit';
 let subject;
 
 moduleForComponent('context-menu', 'Unit | Component | context-menu', {
-  integration: true,
-  needs: 'service:context-menu',
+  unit:  true,
+  needs: [ 'service:context-menu' ],
 
   beforeEach() {
     subject = this.subject();

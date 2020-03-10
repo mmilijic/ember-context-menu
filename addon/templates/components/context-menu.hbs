@@ -4,6 +4,7 @@
       <ul class="context-menu {{if renderLeft "context-menu--left"}}">
         {{#each items as |item|}}
           {{context-menu-item item=item
+                              class=item.class
                               amount=selection.length
                               itemIsDisabled=itemIsDisabled
                               clickAction=clickAction}}
