@@ -10,21 +10,38 @@ export default class EmberContextMenu extends Component.extend(layout) {
 
   @service('context-menu') contextMenu;
 
-  @reads('contextMenu.isActive') isActive;
-  @reads('contextMenu.renderLeft') renderLeft;
-  @reads('contextMenu.items') items;
-  @reads('contextMenu.selection') _selection;
-  @reads('contextMenu.details') details;
+  @computed('contextMenu.isActive') get isActive() {
+    return this.contextMenu.isActive;
+  }
+
+  @computed('contextMenu.renderLeft') get renderLeft() {
+    return this.contextMenu.renderLeft;
+  }
+
+  @computed('contextMenu.items') get items() {
+    return this.contextMenu.items;
+  }
+
+  @computed('contextMenu.selection') get _selection() {
+    return this.contextMenu.selection;
+  }
+
+  @computed('contextMenu.details') get details() {
+    return this.contextMenu.details;
+  }
+
   @reads('contextMenu.event') clickEvent;
 
   @computed('_selection.[]')
   get selection() {
     return [].concat(get(this, '_selection'));
   }
+
   @computed('contextMenu')
   get cmClass() {
     return this.contextMenu.ContextMenuClass;
   }
+
   didInsertElement() {
     super.didInsertElement(...arguments);
     this.setWormholeTarget();
