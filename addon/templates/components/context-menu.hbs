@@ -1,12 +1,12 @@
 {{#if isActive}}
   {{#ember-wormhole to="wormhole-context-menu"}}
-    <div class="context-menu-container" style={{position}}>
+    <div class={{concat "context-menu-container " cmClass}} style={{position}}>
       <ul class="context-menu {{if renderLeft "context-menu--left"}}">
         {{#each items as |item|}}
-          {{context-menu-item item=item
-                              amount=selection.length
-                              itemIsDisabled=itemIsDisabled
-                              clickAction=clickAction}}
+          <ContextMenuItem @item={{item}}
+                              @amount={{selection.length}}
+                              @itemIsDisabled={{itemIsDisabled}}
+                              @clickAction={{clickAction}}/>
         {{/each}}
       </ul>
     </div>

@@ -11,7 +11,7 @@ moduleForComponent('context-menu', 'Integration | Component | {{context-menu}}',
     integration: true,
 
     beforeEach() {
-      this.render(hbs`{{context-menu}}`);
+      this.render(hbs`<ContextMenu/>`);
 
       $target = $('#wormhole-context-menu');
       contextMenu = this.container.lookup('service:context-menu');

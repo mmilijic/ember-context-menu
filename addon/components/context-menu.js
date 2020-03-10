@@ -6,46 +6,51 @@ import { htmlSafe } from '@ember/string';
 import { reads } from '@ember/object/computed';
 import { computed, get } from '@ember/object';
 
-export default Component.extend({
-  layout,
+export default class EmberContextMenu extends Component.extend(layout) {
 
-  contextMenu: service('context-menu'),
+  @service('context-menu') contextMenu;
 
-  isActive:   reads('contextMenu.isActive'),
-  renderLeft: reads('contextMenu.renderLeft'),
-  items:      reads('contextMenu.items'),
-  _selection: reads('contextMenu.selection'),
-  details:    reads('contextMenu.details'),
-  clickEvent: reads('contextMenu.event'),
+  @reads('contextMenu.isActive') isActive;
+  @reads('contextMenu.renderLeft') renderLeft;
+  @reads('contextMenu.items') items;
+  @reads('contextMenu.selection') _selection;
+  @reads('contextMenu.details') details;
+  @reads('contextMenu.event') clickEvent;
 
-  selection: computed('_selection.[]', function() {
+  @computed('_selection.[]')
+  get selection() {
     return [].concat(get(this, '_selection'));
-  }),
-
+  }
+  @computed('contextMenu')
+  get cmClass() {
+    return this.contextMenu.ContextMenuClass;
+  }
   didInsertElement() {
-    this._super(...arguments);
+    super.didInsertElement(...arguments);
     this.setWormholeTarget();
-  },
+  }
 
   setWormholeTarget() {
     let id = 'wormhole-context-menu';
-    let target = document.querySelectorAll(`#${id}`);
+    let target = document.querySelectorAll(`#${ id }`);
     if (target.length === 0) {
-      document.body.insertAdjacentHTML('beforeend', `<div id="${id}"></div>`);
+      document.body.insertAdjacentHTML('beforeend', `<div id="${ id }"></div>`);
     }
-  },
+  }
 
-  position: computed('contextMenu.position.{left,top}', function() {
+  @computed('contextMenu.position.{left,top}')
+  get position() {
     let { left, top } = get(this, 'contextMenu.position') || {};
-    return htmlSafe(`left: ${left}px; top: ${top}px;`);
-  }),
+    return htmlSafe(`left: ${ left }px; top: ${ top }px;`);
+  }
 
-  itemIsDisabled: computed('selection.[]', 'details', function() {
+  @computed('selection.[]', 'details')
+  get itemIsDisabled() {
     let selection = get(this, 'selection') || [];
-    let details   = get(this, 'details');
+    let details = get(this, 'details');
 
-    return function(item) {
-      let disabled  = get(item, 'disabled');
+    return function (item) {
+      let disabled = get(item, 'disabled');
 
       if (!get(item, 'action') && !get(item, 'subActions')) {
         return true;
@@ -57,15 +62,16 @@ export default Component.extend({
 
       return disabled;
     };
-  }),
+  }
 
-  clickAction: computed('selection.[]', 'details', function() {
+  @computed('selection.[]', 'details')
+  get clickAction() {
     let selection = get(this, 'selection');
-    let details   = get(this, 'details');
-    let event     = get(this, 'clickEvent');
+    let details = get(this, 'details');
+    let event = get(this, 'clickEvent');
 
-    return function(item) {
+    return function (item) {
       invokeAction(item, 'action', selection, details, event);
     };
-  })
-});
+  }
+}
