@@ -1,48 +1,37 @@
-import Service from '@ember/service';
-import { assert } from '@ember/debug';
+import Service      from '@ember/service';
+import { assert }   from '@ember/debug';
 import { get, set } from '@ember/object';
 
-const itemHeight = 32;
+const itemHeight    = 32;
 const safetyMarginX = 400;
 const safetyMarginY = 32;
 
 function renderLeft(xPosition, screenWidth) {
-  if (!xPosition || !screenWidth) {
-    return false;
-  }
+  if (!xPosition || !screenWidth) { return false; }
 
   let onRightHalf = xPosition > screenWidth * 0.5;
-  let spaceRight = screenWidth - xPosition;
+  let spaceRight  = screenWidth - xPosition;
 
   return onRightHalf && spaceRight < safetyMarginX;
 }
 
 function correctedPositionY(yPosition, screenHeight, itemCount) {
   let estimatedHeight = itemCount * itemHeight + safetyMarginY;
-  let breakPoint = screenHeight - estimatedHeight;
+  let breakPoint      = screenHeight - estimatedHeight;
 
   return yPosition > breakPoint ? breakPoint : yPosition;
 }
 
-export default class ContextMenuService extends Service {
-  isActive = false;
-  contextMenuClass = '';
-
-  addClass(className) {
-    set(this, 'contextMenuClass', className);
-  }
-
-  get ContextMenuClass() {
-    return this.contextMenuClass;
-  }
+export default Service.extend({
+  isActive: false,
 
   deactivate2() {
-    set(this, 'isActive', false);
-  }
+    set(this, 'isActive',   false);
+  },
 
   activate(event, items, selection, details) {
     let { clientX, clientY } = event;
-    let screenWidth = get(event, 'view.window.innerWidth');
+    let screenWidth  = get(event, 'view.window.innerWidth');
     let screenHeight = get(event, 'view.window.innerHeight');
 
     selection = selection ? [].concat(selection) : [];
@@ -59,22 +48,22 @@ export default class ContextMenuService extends Service {
 
     set(this, 'position', {
       left: clientX,
-      top: correctedPositionY(clientY, screenHeight, get(items, 'length'))
+      top:  correctedPositionY(clientY, screenHeight, get(items, 'length'))
     });
 
-    set(this, 'event', event);
-    set(this, 'items', items);
-    set(this, 'selection', selection);
-    set(this, 'details', details);
+    set(this, 'event',      event);
+    set(this, 'items',      items);
+    set(this, 'selection',  selection);
+    set(this, 'details',    details);
     set(this, 'renderLeft', renderLeft(clientX, screenWidth));
-    set(this, 'isActive', true);
+    set(this, 'isActive',   true);
 
     // this.addDeactivateHandler();
-  }
+  },
 
   willDestroy() {
     this.removeDeactivateHandler();
-  }
+  },
 
   removeDeactivateHandler() {
     let deactivate = get(this, 'deactivate');
@@ -83,7 +72,7 @@ export default class ContextMenuService extends Service {
       document.body.removeEventListener('click', deactivate);
       set(this, 'deactivate', null);
     }
-  }
+  },
 
   addDeactivateHandler() {
     let deactivate = () => set(this, 'isActive', false);
@@ -91,4 +80,4 @@ export default class ContextMenuService extends Service {
 
     document.body.addEventListener('click', deactivate, { once: true });
   }
-}
+});
